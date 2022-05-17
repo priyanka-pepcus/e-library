@@ -34,14 +34,14 @@ public class UserService {
   public String issueBook(int id, List<Book> requestedBook) {
 
     Optional<User> existingUserOptional = userRepository.findById(id);
-   //handle custom exception if userid not available
+    // handle custom exception if userid not available
     if (!existingUserOptional.isPresent()) {
       throw new ResourceNotFoundException("Not found User with id = " + id);
     } else {
       User user = existingUserOptional.get();
 
       if (user.getDeactivationDate() == null) {
-        //checks book presence in db
+        // checks book presence in db
         for (Book one : requestedBook) {
           List<Book> existingBookList = bookRepository.findAll();
           for (Book two : existingBookList) {
@@ -49,17 +49,17 @@ public class UserService {
               if (user.getBook().contains(two)) {
 
                 return "you already issued these books.";
-              }
-              //checks if book is issued to another user
-              else if ((two.getIssueOn() != null & two.getReturnOn() == null)
-                  || (two.getIssueOn().isAfter(two.getReturnOn()))) {
-                return "This book is already issued to other user !!!";
-              }
-              {
+              } else if (two.getIssueOn() == null & two.getReturnOn() == null) {
                 two.setIssueOn(LocalDateTime.now());
                 List<Book> bookList = user.getBook();
                 bookList.add(two);
+                userRepository.save(user);
+                return "Book issued succesfully !!!";
 
+              } else if ((two.getIssueOn() != null & two.getReturnOn() == null)
+                  || ((two.getIssueOn() != null & two.getReturnOn() != null)
+                      & two.getIssueOn().isAfter(two.getReturnOn()))) {
+                return "This book is already issued to other user !!!";
               }
 
             }
@@ -68,15 +68,15 @@ public class UserService {
         }
 
       }
-      userRepository.save(user);
-      return "Book issued succesfully !!!";
+
     }
+    return "Something went wrong !!!";
 
   }
 
   public String deregisterUserById(int id) {
     Optional<User> existingUser = userRepository.findById(id);
-    //handle custom exception if userid not available
+    // handle custom exception if userid not available
     if (!existingUser.isPresent()) {
       throw new ResourceNotFoundException("Not found User with id = " + id);
     }
@@ -95,7 +95,7 @@ public class UserService {
 
   public String returnBook(int userId, List<Book> returnBook) {
     Optional<User> existingUserOptional = userRepository.findById(userId);
-    //handle custom exception if userid not available
+    // handle custom exception if userid not available
     if (!existingUserOptional.isPresent()) {
       throw new ResourceNotFoundException("Not found User with id = " + userId);
     } else {
