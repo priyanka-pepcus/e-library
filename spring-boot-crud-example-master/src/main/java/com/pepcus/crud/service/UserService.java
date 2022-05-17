@@ -46,31 +46,40 @@ public class UserService {
           List<Book> existingBookList = bookRepository.findAll();
           for (Book two : existingBookList) {
             if (one.getId().equals(two.getId())) {
-              if (user.getBook().contains(two)) {
+              if (user.getBook().contains(two) && (two.getIssueOn() != null && (two.getReturnOn() == null))
+                  || (user.getBook().contains(two) && two.getIssueOn() != null && two.getReturnOn() != null
+                      && two.getIssueOn().isAfter(two.getReturnOn()))) {
 
                 return "you already issued these books.";
-              } else if (two.getIssueOn() == null & two.getReturnOn() == null) {
+              }
+
+              else if ((two.getIssueOn() == null && (two.getReturnOn() == null))) {
+
                 two.setIssueOn(LocalDateTime.now());
                 List<Book> bookList = user.getBook();
                 bookList.add(two);
-                userRepository.save(user);
-                return "Book issued succesfully !!!";
 
-              } else if ((two.getIssueOn() != null & two.getReturnOn() == null)
-                  || ((two.getIssueOn() != null & two.getReturnOn() != null)
-                      & two.getIssueOn().isAfter(two.getReturnOn()))) {
+              }
+
+              else if ((!(user.getBook().contains(two))) && (two.getIssueOn() != null && (two.getReturnOn() == null))
+                  || (!(user.getBook().contains(two)) && two.getIssueOn() != null && two.getReturnOn() != null
+                      && two.getIssueOn().isAfter(two.getReturnOn()))) {
+
                 return "This book is already issued to other user !!!";
               }
 
             }
+
           }
 
         }
-
+        userRepository.save(user);
+        return "Book issued succesfully !!!";
       }
 
+      return "Book is not available in Library !!!";
+
     }
-    return "Something went wrong !!!";
 
   }
 
