@@ -32,6 +32,7 @@ public class BookController {
   private String saveIssueBook(@PathVariable int userId, @RequestBody List<Book> book) {
     System.out.println("controllerrrrrr   "+userId);
     System.out.println("controllerrrrrr   "+book.get(0).getBookName());
+     System.out.println("controllerrrrrr   "+book.get(0).getBookName());
     return bookService.saveIssueBook(userId, book);
   }
 
