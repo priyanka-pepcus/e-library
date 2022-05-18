@@ -31,7 +31,7 @@ public class UserService {
     return userRepository.save(user);
   }
 
-  public String issueBook(int id, List<Book> requestedBook) {
+  public String issueBook(int id, List<Book> requestedBookList) {
 
     Optional<User> existingUserOptional = userRepository.findById(id);
     // handle custom exception if userid not available
@@ -42,28 +42,28 @@ public class UserService {
 
       if (user.getDeactivationDate() == null) {
         // checks book presence in db
-        for (Book one : requestedBook) {
+        for (Book requestedBook : requestedBookList) {
           List<Book> existingBookList = bookRepository.findAll();
-          for (Book two : existingBookList) {
-            if (one.getId().equals(two.getId())) {
-              if (user.getBook().contains(two) && (two.getIssueOn() != null && (two.getReturnOn() == null))
-                  || (user.getBook().contains(two) && two.getIssueOn() != null && two.getReturnOn() != null
-                      && two.getIssueOn().isAfter(two.getReturnOn()))) {
+          for (Book existingBook : existingBookList) {
+            if (requestedBook.getId().equals(existingBook.getId())) {
+              if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
+                  || (user.getBook().contains(existingBook) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
+                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
 
                 return "you already issued these books.";
               }
 
-              else if ((two.getIssueOn() == null && (two.getReturnOn() == null))) {
+              else if ((existingBook.getIssueOn() == null && (existingBook.getReturnOn() == null))) {
 
-                two.setIssueOn(LocalDateTime.now());
+                existingBook.setIssueOn(LocalDateTime.now());
                 List<Book> bookList = user.getBook();
-                bookList.add(two);
+                bookList.add(existingBook);
 
               }
 
-              else if ((!(user.getBook().contains(two))) && (two.getIssueOn() != null && (two.getReturnOn() == null))
-                  || (!(user.getBook().contains(two)) && two.getIssueOn() != null && two.getReturnOn() != null
-                      && two.getIssueOn().isAfter(two.getReturnOn()))) {
+              else if ((!(user.getBook().contains(existingBook))) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
+                  || (!(user.getBook().contains(existingBook)) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
+                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
 
                 return "This book is already issued to other user !!!";
               }
@@ -80,7 +80,6 @@ public class UserService {
       return "Book is not available in Library !!!";
 
     }
-
   }
 
   public String deregisterUserById(int id) {
@@ -102,35 +101,52 @@ public class UserService {
 
   }
 
-  public String returnBook(int userId, List<Book> returnBook) {
-    Optional<User> existingUserOptional = userRepository.findById(userId);
+  public String returnBook(int id, List<Book> requestedBookList) {
+
+    Optional<User> existingUserOptional = userRepository.findById(id);
     // handle custom exception if userid not available
     if (!existingUserOptional.isPresent()) {
-      throw new ResourceNotFoundException("Not found User with id = " + userId);
+      throw new ResourceNotFoundException("Not found User with id = " + id);
     } else {
       User user = existingUserOptional.get();
 
-      if (user.getDeactivationDate() == null & (!user.getBook().isEmpty())) {
-        List<Book> existingBookList = user.getBook();
-        for (Book one : existingBookList) {
-          for (Book two : returnBook) {
-            if (one.getId().equals(two.getId())) {
-              if (user.getBook().contains(two)) {
-                two.setReturnOn(LocalDateTime.now());
+      if (user.getDeactivationDate() == null) {
+        // checks book presence in db
+        for (Book requestedBook : requestedBookList) {
+          List<Book> existingBookList = bookRepository.findAll();
+          for (Book existingBook : existingBookList) {
+            if (requestedBook.getId().equals(existingBook.getId())) {
+              if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
+                  || (user.getBook().contains(existingBook) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
+                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
+                existingBook.setReturnOn(LocalDateTime.now());
                 List<Book> bookList = user.getBook();
-                bookList.remove(two);
-                userRepository.save(user);
+                bookList.remove(existingBook);
 
+              } else if (user.getBook().isEmpty()) {
+                return "You dont have these books or You didn't issued book, so you cant return !!!";
               }
 
-            }
-          }
+              else if ((!(user.getBook().contains(existingBook))) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
+                  || (!(user.getBook().contains(existingBook)) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
+                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
 
+                return "You dont have permission to return these books. These books are issued to other user !!!";
+              }
+
+            } 
+
+          }
+          
+           // return "this book doesent belongs to you / library doesnt contain this book!!!";
+          
         }
-        return "Book Returned succesfully !!!";
+        userRepository.save(user);
+        return "Book returned succesfully !!!";
       }
+
     }
-    return "you dont have these books.";
+    return "User is deactivated cant perform any action !!!";
 
   }
 
