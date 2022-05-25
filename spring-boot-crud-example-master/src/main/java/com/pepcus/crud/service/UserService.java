@@ -31,61 +31,69 @@ public class UserService {
     return userRepository.save(user);
   }
 
+  /*
+   * @param id is userid
+   * 
+   * @param requestedBookList is list of book to issue
+   */
+
   public String issueBook(int id, List<Book> requestedBookList) {
 
     Optional<User> existingUserOptional = userRepository.findById(id);
-    // handle custom exception if userid not available
+
+    // @throw CustomException if userId not available in db
     if (!existingUserOptional.isPresent()) {
+
       throw new ResourceNotFoundException("Not found User with id = " + id);
     } else {
       User user = existingUserOptional.get();
-
       if (user.getDeactivationDate() == null) {
         // checks book presence in db
         for (Book requestedBook : requestedBookList) {
-          List<Book> existingBookList = bookRepository.findAll();
-          for (Book existingBook : existingBookList) {
-            if (requestedBook.getId().equals(existingBook.getId())) {
-              if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
-                  || (user.getBook().contains(existingBook) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
-                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
+          if (bookRepository.existsById(requestedBook.getId())) {
+            List<Book> existingBookList = bookRepository.findAll();
+            for (Book existingBook : existingBookList) {
+              if (requestedBook.getId().equals(existingBook.getId())) {
+                if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null)) {
 
-                return "you already issued these books.";
-              }
+                  return "you already issued these books.";
+                }
 
-              else if ((existingBook.getIssueOn() == null && (existingBook.getReturnOn() == null))) {
+                else if (existingBook.getIssueOn() == null) {
 
-                existingBook.setIssueOn(LocalDateTime.now());
-                List<Book> bookList = user.getBook();
-                bookList.add(existingBook);
+                  existingBook.setIssueOn(LocalDateTime.now());
+                  existingBook.setReturnOn(null);
+                  List<Book> bookList = user.getBook();
+                  bookList.add(existingBook);
 
-              }
+                }
 
-              else if ((!(user.getBook().contains(existingBook))) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
-                  || (!(user.getBook().contains(existingBook)) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
-                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
+                else if ((!(user.getBook().contains(existingBook))) && (existingBook.getIssueOn() != null)) {
 
-                return "This book is already issued to other user !!!";
+                  return "This book is already issued to other user !!!";
+                }
+                // save
+                userRepository.save(user);
+                return "Book issued succesfully !!!";
               }
 
             }
-
           }
-
+          return "Book is not available in Library !!!";
         }
-        userRepository.save(user);
-        return "Book issued succesfully !!!";
+
       }
 
-      return "Book is not available in Library !!!";
+      return "User is deactivated cant perform any action !!!";
 
     }
   }
 
   public String deregisterUserById(int id) {
     Optional<User> existingUser = userRepository.findById(id);
-    // handle custom exception if userid not available
+    // @throw CustomException if userId not available in db
     if (!existingUser.isPresent()) {
+
       throw new ResourceNotFoundException("Not found User with id = " + id);
     }
     User user = existingUser.get();
@@ -104,7 +112,7 @@ public class UserService {
   public String returnBook(int id, List<Book> requestedBookList) {
 
     Optional<User> existingUserOptional = userRepository.findById(id);
-    // handle custom exception if userid not available
+    // @throw CustomException if userId not available in db
     if (!existingUserOptional.isPresent()) {
       throw new ResourceNotFoundException("Not found User with id = " + id);
     } else {
@@ -113,40 +121,39 @@ public class UserService {
       if (user.getDeactivationDate() == null) {
         // checks book presence in db
         for (Book requestedBook : requestedBookList) {
-          List<Book> existingBookList = bookRepository.findAll();
-          for (Book existingBook : existingBookList) {
-            if (requestedBook.getId().equals(existingBook.getId())) {
-              if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
-                  || (user.getBook().contains(existingBook) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
-                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
-                existingBook.setReturnOn(LocalDateTime.now());
-                List<Book> bookList = user.getBook();
-                bookList.remove(existingBook);
+          if (bookRepository.existsById(requestedBook.getId())) {
+            List<Book> existingBookList = bookRepository.findAll();
+            for (Book existingBook : existingBookList) {
+              if (requestedBook.getId().equals(existingBook.getId())) {
+                if (user.getBook().contains(existingBook) && (existingBook.getIssueOn() != null)) {
+                  existingBook.setReturnOn(LocalDateTime.now());
+                  existingBook.setIssueOn(null);
+                  List<Book> bookList = user.getBook();
+                  bookList.remove(existingBook);
 
-              } else if (user.getBook().isEmpty()) {
-                return "You dont have these books or You didn't issued book, so you cant return !!!";
+                } else if (!(user.getBook().contains(existingBook)) && existingBook.getIssueOn() != null) {
+                  return "You dont have permission to return these books. These books are issued to other user !!!";
+
+                }
+
+                else if (user.getBook().isEmpty())
+
+                {
+                  return "You didn't issued book yet, so you cant return !!!";
+
+                }
+                userRepository.save(user);
+                return "Book returned succesfully !!!";
               }
 
-              else if ((!(user.getBook().contains(existingBook))) && (existingBook.getIssueOn() != null && (existingBook.getReturnOn() == null))
-                  || (!(user.getBook().contains(existingBook)) && existingBook.getIssueOn() != null && existingBook.getReturnOn() != null
-                      && existingBook.getIssueOn().isAfter(existingBook.getReturnOn()))) {
-
-                return "You dont have permission to return these books. These books are issued to other user !!!";
-              }
-
-            } 
-
+            }
           }
-          
-           // return "this book doesent belongs to you / library doesnt contain this book!!!";
-          
+          return "This Book doesn't belongs to Library Center !!!";
         }
-        userRepository.save(user);
-        return "Book returned succesfully !!!";
-      }
 
+      }
+      return "User is deactivated cant perform any action !!!";
     }
-    return "User is deactivated cant perform any action !!!";
 
   }
 
