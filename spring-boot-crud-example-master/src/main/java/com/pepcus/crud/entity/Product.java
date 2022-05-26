@@ -22,8 +22,23 @@ public class Product {
   private String name;
   private int quantity;
   private double price;
+  
+  
 
-  public int getId() {
+  public Product() {
+	super();
+	// TODO Auto-generated constructor stub
+}
+
+public Product(int id, String name, int quantity, double price) {
+	super();
+	this.id = id;
+	this.name = name;
+	this.quantity = quantity;
+	this.price = price;
+}
+
+public int getId() {
     return id;
   }
 

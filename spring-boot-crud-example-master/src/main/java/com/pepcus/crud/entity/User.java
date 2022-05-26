@@ -75,8 +75,28 @@ public class User {
 //  public void setActive(boolean active) {
 //    this.active = active;
 //  }
+  
+  
 
-  public List<Book> getBook() {
+public User(Integer userId, @NotNull String name, @NotNull LocalDateTime registrationDate,
+		LocalDateTime deactivationDate, List<Book> book) {
+	super();
+	this.userId = userId;
+	this.name = name;
+	this.registrationDate = registrationDate;
+	this.deactivationDate = deactivationDate;
+	this.book = book;
+}
+
+public User(String string, Object object, Object object2) {
+	// TODO Auto-generated constructor stub
+}
+
+public User() {
+	// TODO Auto-generated constructor stub
+}
+
+public List<Book> getBook() {
     return book;
   }
 

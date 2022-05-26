@@ -8,10 +8,10 @@
 		<version>2.2.4.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.javatechie</groupId>
-	<artifactId>spring-boot-crud-example-2</artifactId>
+	<groupId>com.pepcus</groupId>
+	<artifactId>spring-boot-crud</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>spring-boot-crud-example-2</name>
+	<name>spring-boot-crud</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -24,7 +24,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen -->
+
 
 
 		<dependency>
@@ -61,7 +61,9 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.univocity/univocity-parsers -->
+		<!-- <dependency> <groupId>org.junit.jupiter</groupId> <artifactId>junit-jupiter-engine</artifactId> 
+			<version>5.4.0</version> <scope>test</scope> </dependency> -->
+		<!-- csv parser for file program -->
 		<dependency>
 			<groupId>com.univocity</groupId>
 			<artifactId>univocity-parsers</artifactId>
