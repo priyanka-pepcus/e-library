@@ -86,13 +86,8 @@ public class EmployeeController {
     return employeeService.deleteEmployeeById(id);
   }
 
-  @DeleteMapping
-  public String deleteAll() {
-    return employeeService.deleteAll();
-  }
-
-  @GetMapping("/findByNameAgeSpec/{name}/{age}")
-  public List<Employee> findByNameAge(@PathVariable("name") String name, @PathVariable("age") int age) {
+  @GetMapping("/findByNameAgeSpec")
+  public List<Employee> findByNameAge(@RequestParam("name") String name, @RequestParam("age") int age) {
     return employeeRepository.findAll(where(getEmployeesByNameSpec(name).and(getEmployeesByAgeSpec(age))));
   }
 

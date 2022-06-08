@@ -13,7 +13,7 @@ public class Address {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int address_id;
+  private int addressId;
 
   @Size(min = 2, message = "City should have atleast 2 characters")
   private String city;
@@ -24,11 +24,11 @@ public class Address {
   private String pincode;
 
   public int getId() {
-    return address_id;
+    return addressId;
   }
 
   public void setId(int id) {
-    this.address_id = id;
+    this.addressId = id;
   }
 
   public String getCity() {

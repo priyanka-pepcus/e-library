@@ -11,21 +11,36 @@ public class ErrorDetails {
   private String description;
 
   public ErrorDetails(Date date, String message, Map<String, String> errorMap) {
-    super();
+	  this();
     this.timestamp = date;
     this.message = message;
     this.details = errorMap;
   }
 
   public ErrorDetails(int statusCode, Date timestamp, String message, String description) {
-    super();
+	  this();
     this.statusCode = statusCode;
     this.timestamp = timestamp;
     this.message = message;
     this.description = description;
   }
+  
 
-  public int getStatusCode() {
+  public ErrorDetails(int statusCode, Date timestamp, String message, Map<String, String> details, String description) {
+	
+	this.statusCode = statusCode;
+	this.timestamp = timestamp;
+	this.message = message;
+	this.details = details;
+	this.description = description;
+}
+
+public ErrorDetails() {
+	super();
+	// TODO Auto-generated constructor stub
+}
+
+public int getStatusCode() {
     return statusCode;
   }
 
